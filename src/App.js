@@ -1,37 +1,50 @@
 // import { log } from "console";
 import React, { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-  { id: 3, description: "Shirt", quantity: 12, packed: true },
-  { id: 4, description: "Shoes", quantity: 12, packed: false },
-  { id: 5, description: "Console", quantity: 12, packed: false },
-  { id: 6, description: "Laptop", quantity: 12, packed: true },
-  { id: 7, description: "Charger", quantity: 12, packed: false },
-];
+// const initialItems = [
+// { id: 1, description: "Passports", quantity: 2, packed: false },
+// { id: 2, description: "Socks", quantity: 12, packed: false },
+// { id: 3, description: "Shirt", quantity: 12, packed: true },
+// { id: 4, description: "Shoes", quantity: 12, packed: false },
+// { id: 5, description: "Console", quantity: 12, packed: false },
+// { id: 6, description: "Laptop", quantity: 12, packed: true },
+// { id: 7, description: "Charger", quantity: 12, packed: false },
+// ];
 
 export default function App() {
   const [items, setItems] = useState([]);
 
+  // Add items
   function handleAddItems(item) {
     // In react we are not allowed to mutate state
     // So we can't use push
     // We must make a new copy of the state
     setItems((items) => [...items, item]);
   }
-  /* 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, packed: false },
-  { id: 2, description: "Socks", quantity: 12, packed: false },
-];
-*/
+
+  // Delete an item
+  function handleDeleteItem(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+
+  // Update the list of items
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
 
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems} />
-      <PacketList items={items} />
+      <PacketList
+        items={items}
+        onDeleteItem={handleDeleteItem}
+        onToggleItem={handleToggleItem}
+      />
       <Stats />
     </div>
   );
@@ -88,24 +101,36 @@ function Form({ onAddItems }) {
   );
 }
 
-function PacketList({ items }) {
+function PacketList({ items, onDeleteItem, onToggleItem }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item item={item} key={item.id} />
+          <Item
+            item={item}
+            onToggleItem={onToggleItem}
+            onDeleteItem={onDeleteItem}
+            key={item.id}
+          />
         ))}
       </ul>
     </div>
   );
 }
-function Item({ item }) {
+function Item({ item, onDeleteItem, onToggleItem }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => {
+          onToggleItem(item.id);
+        }}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>
     </li>
   );
 }
